@@ -66,6 +66,9 @@ enum SecureSession {
  @Published var name = ""
  @Published var role = "owner"
  @Published var counts: Object = [:]
+ @Published var contentRevision = 0
+ private var countsRequestID = 0
+ private var badgeTask: Task<Void,Never>?
  @Published var selectedTab = "dashboard"
  @Published var managementPath: [String] = []
  @Published var alert = ""
@@ -95,7 +98,7 @@ enum SecureSession {
    }
   }
   guard (200..<300).contains(http.statusCode) else {
-   if http.statusCode == 401 && path != "/login" { authenticated = false; csrf = ""; cookie = ""; SecureSession.save(""); pause() }
+   if http.statusCode == 401 && path != "/login" { authenticated = false; csrf = ""; cookie = ""; SecureSession.save(""); countsRequestID += 1; counts = [:]; clearSystemNotifications(); pause() }
    let detail = result["detail"] as? String ?? objects(result["detail"]).map { string($0["msg"]) }.joined(separator: "\n")
    throw AdminFailure(message: detail.isEmpty ? "Operazione non riuscita. Riprova." : detail)
   }
@@ -111,8 +114,51 @@ enum SecureSession {
   await refreshCounts(); await syncPush()
  }
  private func accept(_ response: Object) { csrf = string(response["csrf"]); name = string(response["name"]); role = string(response["role"]); authenticated = true; selectedTab = role == "support" ? "support" : "dashboard"; resume(); consumeSection() }
- func logout() async throws { _ = try await request("/logout", method:"POST"); cookie = ""; csrf = ""; SecureSession.save(""); authenticated = false; counts = [:]; pause() }
- func refreshCounts() async { guard authenticated else { return }; do { counts = object(try await request("/notifications")["counts"]) } catch { if authenticated { alert = error.localizedDescription } } }
+ func logout() async throws { _ = try await request("/logout", method:"POST"); cookie = ""; csrf = ""; SecureSession.save(""); authenticated = false; countsRequestID += 1; counts = [:]; clearSystemNotifications(); pause() }
+ func didMutate() { countsRequestID += 1; contentRevision += 1 }
+ func refreshCounts() async {
+  guard authenticated else { return }
+  countsRequestID += 1
+  let requestID = countsRequestID
+  do {
+   let response = try await request("/notifications")
+   guard authenticated, requestID == countsRequestID else { return }
+   counts = object(response["counts"])
+   synchronizeSystemNotifications()
+  } catch {
+   if authenticated, requestID == countsRequestID { alert = error.localizedDescription }
+  }
+ }
+ func synchronizeSystemNotifications() {
+  updateSystemBadge()
+  UNUserNotificationCenter.current().getDeliveredNotifications { [weak self] delivered in
+   Task { @MainActor in
+    guard let self = self, self.authenticated else { return }
+    let currentTotal = ["photos","reports","support"].reduce(0) { $0 + max(0, (self.counts[$1] as? Int) ?? 0) }
+    let resolved = delivered.filter { notification in
+     let section = notification.request.content.userInfo["section"] as? String ?? ""
+     return currentTotal == 0 || (["photos","reports","support"].contains(section) && (self.counts[section] as? Int ?? 0) == 0)
+    }.map { $0.request.identifier }
+    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers:resolved)
+    self.updateSystemBadge()
+   }
+  }
+ }
+ private func updateSystemBadge() {
+  // Serialize OS updates so an older asynchronous badge write cannot win.
+  let previous = badgeTask
+  badgeTask = Task { [weak self] in
+   await previous?.value
+   guard let self = self else { return }
+   let total = self.authenticated ? ["photos","reports","support"].reduce(0) { $0 + max(0,(self.counts[$1] as? Int) ?? 0) } : 0
+   _ = try? await UNUserNotificationCenter.current().setBadgeCount(total)
+  }
+ }
+ func clearSystemNotifications() {
+  updateSystemBadge()
+  UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+ }
+
  func resume() { pause(); guard authenticated else { return }; timer = Timer.scheduledTimer(withTimeInterval:30,repeats:true) { [weak self] _ in Task { @MainActor in await self?.refreshCounts(); await self?.syncPush() } } }
  func pause() { timer?.invalidate(); timer = nil }
  func open(_ section: String) { guard ["support","photos","reports"].contains(section) else { return }; pendingSection = section; consumeSection() }

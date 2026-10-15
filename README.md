@@ -1,4 +1,4 @@
-# Prism Admin 2.0.0 — iOS nativo
+# Prism Admin 2.0.1 — iOS nativo
 
 Interfaccia SwiftUI, API URLSession, sessione in Keychain, notifiche Firebase/APNs.
 Bundle identifier: app.prism.admin. Team: B8SC92LPR5. iOS minimo: 16.
@@ -8,7 +8,7 @@ Bundle identifier: app.prism.admin. Team: B8SC92LPR5. iOS minimo: 16.
 2. Rimuovi i vecchi PRISM/PrismViewController.swift e PRISM/LocalAccount.swift. Non sono più referenziati dal progetto.
 3. Includi nel commit il workspace condiviso e Package.resolved dentro PrismAdmin.xcodeproj; Firebase è fissato alla versione 11.15.0.
 4. Avvia il workflow esistente Xcode Cloud, con lo scheme PrismAdmin e la distribuzione TestFlight per il tuo account.
-5. Versione 2.0.0; build locale 9, sostituita dal numero progressivo CI_BUILD_NUMBER in Xcode Cloud.
+5. Versione 2.0.1; build locale 10, sostituita dal numero progressivo CI_BUILD_NUMBER in Xcode Cloud.
 
 L’identificativo dell’app, il file GoogleService-Info.plist e la capability push sono gli stessi della precedente app admin. Accedi con le credenziali del pannello; la precedente sessione WebView non viene trasferita. La nuova sessione è protetta in Keychain e scade secondo la durata definita dal server (8 ore).
 

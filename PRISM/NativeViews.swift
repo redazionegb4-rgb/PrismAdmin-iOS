@@ -60,7 +60,7 @@ import ImageIO
     ForEach(["users","new_users","online","suspended"],id:\.self) { key in VStack(alignment:.leading,spacing:10) { Text(Catalog.label(key)).font(.caption).foregroundStyle(.secondary); Text(string(object(data["stats"])[key] ?? "—")).font(.system(size:32,weight:.semibold)) }.frame(maxWidth:.infinity,alignment:.leading).padding(20).background(panel,in:RoundedRectangle(cornerRadius:22)) }
    }
    if let trend=data["trend"] as? [Object],!trend.isEmpty { TrendView(rows:trend) }
-  }.padding(20) }.background(canvas).navigationTitle("Panoramica").navigationBarTitleDisplayMode(.inline).toolbar { Button {Task {await load()}} label: {Image(systemName:"arrow.clockwise")} }.refreshable {await load()}.task {await load()}.overlay {if busy && data.isEmpty {ProgressView()}}
+  }.padding(20) }.background(canvas).navigationTitle("Panoramica").navigationBarTitleDisplayMode(.inline).toolbar { Button {Task {await load()}} label: {Image(systemName:"arrow.clockwise")} }.refreshable {await load()}.task {await load()}.onChange(of:store.contentRevision){_ in Task{await load()}}.overlay {if busy && data.isEmpty {ProgressView()}}
  }
  func load() async {busy=true;defer{busy=false};do{data=try await store.request("/dashboard");error="";await store.refreshCounts()}catch{self.error=error.localizedDescription}}
 }
@@ -108,6 +108,8 @@ extension Dictionary where Key==String,Value==Any { var idString:String {string(
  @State private var offset=0
  @State private var error=""
  @State private var busy=false
+ @State private var reloadQueued=false
+ @State private var visible=false
  @State private var form:NativeFormSpec?
  var moduleID:String {string(module["id"])}
  var body:some View { List {
@@ -123,7 +125,7 @@ extension Dictionary where Key==String,Value==Any { var idString:String {string(
    if rows.count < (data["total"] as? Int ?? rows.count) {Button("Carica altri"){Task{await load(more:true)}}.disabled(busy)}
   }
   ForEach(Array(objects(module["groups"]).enumerated()),id:\.offset){_,group in Section(string(group["title"])){ForEach(Array(objects(data[string(group["key"])]).enumerated()),id:\.offset){_,row in NavigationLink {NativeRowDetail(store:store,module:group,row:row)}label:{ModuleRow(module:group,row:row)}}}}
- }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(module["title"])).toolbar {Button{Task{await load()}}label:{Image(systemName:"arrow.clockwise")}}.overlay{if busy && rows.isEmpty && data.isEmpty{ProgressView()}}.refreshable{await load()}.task{if filter.isEmpty{filter=string(objects(module["filters"]).first?["value"])};await load()}.sheet(item:$form){ spec in NativeForm(store:store,spec:spec){await load()} }
+ }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(module["title"])).toolbar {Button{Task{await load()}}label:{Image(systemName:"arrow.clockwise")}}.overlay{if busy && rows.isEmpty && data.isEmpty{ProgressView()}}.refreshable{await load()}.task{if filter.isEmpty{filter=string(objects(module["filters"]).first?["value"])};await load()}.onAppear{visible=true}.onDisappear{visible=false}.onChange(of:store.contentRevision){_ in if visible{Task{await load()}}}.sheet(item:$form,onDismiss:{Task{await load()}}){ spec in NativeForm(store:store,spec:spec){} }
  }
  @ViewBuilder func rowView(_ row:Object)->some View {
   if moduleID=="users" {NavigationLink {NativeUser(store:store,uid:string(row["id"]))}label:{ModuleRow(module:["rowTitle":["name"],"rowSubtitle":["email","suspension_reason"]],row:row)}}
@@ -131,7 +133,7 @@ extension Dictionary where Key==String,Value==Any { var idString:String {string(
   else if moduleID=="support" {NavigationLink{NativeTicket(store:store,tid:string(row["id"]))}label:{ModuleRow(module:["rowTitle":["subject"],"rowSubtitle":["name","status","updated_at"]],row:row)}}
   else {NavigationLink{NativeRowDetail(store:store,module:module,row:row)}label:{ModuleRow(module:moduleID=="reports" ? ["id":"reports","rowTitle":["target_name"],"rowSubtitle":["reason","status"]] : module,row:row)}}
  }
- func load(more:Bool=false) async {guard !busy else{return};busy=true;defer{busy=false};let next=more ? offset+25 : 0;var components=URLComponents();components.queryItems=[URLQueryItem(name:"offset",value:String(next)),URLQueryItem(name:"q",value:q),URLQueryItem(name:"status",value:filter.isEmpty ? "all":filter)];do{let response=try await store.request(string(module["path"])+(components.string ?? ""));data=response;let new=objects(response[string(module["rows"] ?? "items")]);rows=more ? rows+new:new;offset=next;error=""}catch{self.error=error.localizedDescription}}
+ func load(more:Bool=false) async {guard !busy else{if !more{reloadQueued=true};return};busy=true;let revision=store.contentRevision;defer{busy=false;if reloadQueued{reloadQueued=false;if visible{Task{await load()}}}};let next=more ? offset+25 : 0;var components=URLComponents();components.queryItems=[URLQueryItem(name:"offset",value:String(next)),URLQueryItem(name:"q",value:q),URLQueryItem(name:"status",value:filter.isEmpty ? "all":filter)];do{let response=try await store.request(string(module["path"])+(components.string ?? ""));guard revision==store.contentRevision else{reloadQueued=true;return};data=response;let new=objects(response[string(module["rows"] ?? "items")]);rows=more ? rows+new:new;offset=next;error=""}catch{self.error=error.localizedDescription}}
 }
 extension Dictionary where Key==String,Value==Any {var optionValue:String{string(self["value"])}}
 @MainActor struct ModuleRow:View {let module:Object,row:Object;var body:some View {HStack(spacing:14){Image(systemName:string(module["icon"] ?? "person.crop.circle")).foregroundStyle(gold).frame(width:32);VStack(alignment:.leading,spacing:6){Text((module["rowTitle"] as? [String] ?? ["name","title","subject","email","action"]).compactMap{let s=string(row[$0]);return s.isEmpty ? nil:s}.first ?? "Elemento").font(.headline);ForEach(module["rowSubtitle"] as? [String] ?? ["status","created_at"],id:\.self){key in if let v=row[key],!(v is NSNull){Text(Catalog.display(v)).font(.caption).foregroundStyle(.secondary).lineLimit(2)}}}.padding(.vertical,6)}}}
@@ -150,7 +152,8 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
  @ObservedObject var store:AdminStore
  let module:Object,row:Object
  @State private var form:NativeFormSpec?
- @State private var saved=false
+ @State private var completed=false
+ @Environment(\.dismiss) private var dismiss
  var actions: [Object] {
   if string(module["id"]) == "reports" {
    let fields: [Object] = [
@@ -165,9 +168,8 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
   if string(module["id"])=="stories",let payload=row["payload"] as? Object {if let image=payload["image"] as? String{NativePhoto(source:image).frame(height:250)};NativeInfo(data:payload)}
   NativeInfo(data:row)
   if let uid=(row["target"] ?? row["user_id"]) as? String {NavigationLink("Apri profilo"){NativeUser(store:store,uid:uid)}}
-  if saved{Label("Operazione completata. Aggiorna la lista per vedere lo stato attuale.",systemImage:"checkmark.circle").foregroundStyle(gold)}
   ForEach(Array(actions.enumerated()),id:\.offset){_,a in Button(string(a["title"]),role:a["danger"] as? Bool == true ? .destructive:nil){form=NativeFormSpec(action:a,context:row)}}
- }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(module["title"] ?? "Dettaglio")).sheet(item:$form){spec in NativeForm(store:store,spec:spec){saved=true;await store.refreshCounts()}}}
+ }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(module["title"] ?? "Dettaglio")).sheet(item:$form,onDismiss:{if completed{dismiss()}}){spec in NativeForm(store:store,spec:spec){completed=true}}}
 }
 @MainActor struct NativeUser:View {
  @ObservedObject var store:AdminStore
@@ -185,7 +187,7 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
    if store.role=="owner"{Button{form=NativeFormSpec(action:["title":"Modifica profilo","method":"PUT","path":"/users/{id}/profile","fields":Catalog.data["profile"] ?? []],context:data,profile:true)}label:{Label("Modifica tutto il profilo",systemImage:"pencil.circle.fill")}.foregroundStyle(gold)}
    Section("Gestisci account"){ForEach(Array((objects(Catalog.data["userActions"])+(store.role=="owner" ? objects(Catalog.data["ownerActions"]):[])).enumerated()),id:\.offset){_,a in Button(string(a["title"]),role:a["danger"] as? Bool == true ? .destructive:nil){form=NativeFormSpec(action:a,context:data)}}}
   }
- }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(data["name"]).isEmpty ? "Profilo":string(data["name"])).task{await load()}.refreshable{await load()}.sheet(item:$form){spec in NativeForm(store:store,spec:spec){await load();await store.refreshCounts()}}
+ }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(data["name"]).isEmpty ? "Profilo":string(data["name"])).task{await load()}.refreshable{await load()}.onChange(of:store.contentRevision){_ in Task{await load()}}.sheet(item:$form){spec in NativeForm(store:store,spec:spec){} }
  }
  func load()async{busy=true;defer{busy=false};do{data=try await store.request("/users/"+uid);error=""}catch{self.error=error.localizedDescription}}
 }
@@ -194,7 +196,8 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
  let row:Object
  @State private var note=""
  @State private var busy=false
- @State private var result=""
+ @State private var completed=false
+ @Environment(\.dismiss) private var dismiss
  @State private var error=""
  @State private var form:NativeFormSpec?
  @State private var rejectConfirmation=false
@@ -203,7 +206,6 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
   LabeledContent("Profilo",value:string(row["name"]))
   NavigationLink("Apri profilo"){NativeUser(store:store,uid:string(row["user_id"]))}
   TextField("Motivo del rifiuto / nota",text:$note,axis:.vertical).lineLimit(3...6)
-  if !result.isEmpty{Label(result,systemImage:"checkmark.circle").foregroundStyle(gold)}
   if !error.isEmpty{Text(error).foregroundStyle(.red)}
   HStack {Button("Approva"){Task{await decide("approved")}}.buttonStyle(.borderedProminent).tint(gold).foregroundStyle(.black);Spacer();Button("Rifiuta",role:.destructive){rejectConfirmation=true}.buttonStyle(.bordered)}.disabled(busy)
    Button("Rimuovi dal profilo", role:.destructive) {
@@ -211,9 +213,9 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
   }.disabled(busy)
  }.scrollContentBackground(.hidden).background(canvas).navigationTitle("Verifica foto")
   .confirmationDialog("Rifiutare questa foto?",isPresented:$rejectConfirmation,titleVisibility:.visible){Button("Rifiuta",role:.destructive){Task{await decide("rejected")}}}
-  .sheet(item:$form){spec in NativeForm(store:store,spec:spec){result="Foto rimossa dal profilo";await store.refreshCounts()}}
+  .sheet(item:$form,onDismiss:{if completed{dismiss()}}){spec in NativeForm(store:store,spec:spec){completed=true}}
  }
- func decide(_ status:String)async{busy=true;defer{busy=false};do{_=try await store.request("/photos/"+string(row["user_id"])+"/"+string(row["photo_hash"]),method:"PUT",body:["status":status,"note":note]);result=status=="approved" ? "Foto approvata":"Foto rifiutata";error="";await store.refreshCounts()}catch{self.error=error.localizedDescription}}
+ func decide(_ status:String)async{guard !busy else{return};busy=true;defer{busy=false};do{_=try await store.request("/photos/"+string(row["user_id"])+"/"+string(row["photo_hash"]),method:"PUT",body:["status":status,"note":note]);store.didMutate();dismiss();await store.refreshCounts()}catch{self.error=error.localizedDescription}}
 }
 @MainActor struct NativeTicket:View {
  @ObservedObject var store:AdminStore
@@ -222,6 +224,7 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
  @State private var reply=""
  @State private var error=""
  @State private var busy=false
+ @Environment(\.dismiss) private var dismiss
  var body:some View { VStack(spacing:0){ScrollView{LazyVStack(alignment:.leading,spacing:16){
   HStack{Text(string(data["subject"])).font(.title2.bold());Spacer();Text(Catalog.display(data["status"])).font(.caption).foregroundStyle(gold)}
   ForEach(Array(objects(data["messages"]).enumerated()),id:\.offset){_,message in let own=message["from_admin"] as? Bool == true;HStack{if own{Spacer(minLength:30)};VStack(alignment:.leading,spacing:8){Text(own ? "Team Prism":string(data["name"])).font(.caption.bold()).foregroundStyle(gold);Text(string(message["body"])).textSelection(.enabled);Text(Catalog.display(message["created_at"])).font(.caption2).foregroundStyle(.secondary)}.padding(16).background(own ? gold.opacity(0.12):panel,in:RoundedRectangle(cornerRadius:20));if !own{Spacer(minLength:30)}}}
@@ -241,10 +244,12 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
  func changeStatus(_ status:String) async {
   do {
    _ = try await store.request("/support/" + tid, method:"PUT", body:["status":status])
-   await load(); await store.refreshCounts()
+   store.didMutate()
+   if status=="closed"{dismiss()}else{await load()}
+   await store.refreshCounts()
   } catch { self.error = error.localizedDescription }
  }
- func send()async{busy=true;defer{busy=false};do{_=try await store.request("/support/"+tid+"/reply",method:"POST",body:["body":reply]);reply="";await load();await store.refreshCounts()}catch{self.error=error.localizedDescription}}
+ func send()async{busy=true;defer{busy=false};do{_=try await store.request("/support/"+tid+"/reply",method:"POST",body:["body":reply]);reply="";store.didMutate();await load();await store.refreshCounts()}catch{self.error=error.localizedDescription}}
 }
 @MainActor struct NativePhoto:View {
  let source:String

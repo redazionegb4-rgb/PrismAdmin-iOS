@@ -66,7 +66,7 @@ struct NativeFormSpec:Identifiable {
   if spec.profile{body["revision"]=spec.context["profile_revision"] ?? "";if string(value(body,"availability.kind"))=="none"{body["availability"]=NSNull()}}
   let path=string(spec.action["path"]).replacingOccurrences(of:"{id}",with:string(spec.context["id"]))
   busy=true;defer{busy=false}
-  do{_=try await store.request(path,method:string(spec.action["method"]),body:body);await saved();dismiss()}catch{self.error=error.localizedDescription}
+  do{_=try await store.request(path,method:string(spec.action["method"]),body:body);store.didMutate();await saved();dismiss();Task{await store.refreshCounts()}}catch{self.error=error.localizedDescription}
  }
  func upload(_ items:[PhotosPickerItem])async{
   guard !busy,!items.isEmpty else{return};busy=true;defer{busy=false;photoItems=[]}
