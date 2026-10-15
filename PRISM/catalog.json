@@ -1,0 +1,1222 @@
+{
+  "modules": [
+    {
+      "id": "dashboard",
+      "title": "Panoramica",
+      "icon": "square.grid.2x2",
+      "subtitle": "Tutto sotto controllo",
+      "path": "/dashboard",
+      "kind": "dashboard"
+    },
+    {
+      "id": "users",
+      "title": "Utenti",
+      "icon": "person.2",
+      "subtitle": "Profili e dati della community",
+      "path": "/users",
+      "kind": "users",
+      "filters": [
+        {
+          "value": "all",
+          "label": "Tutti"
+        },
+        {
+          "value": "active",
+          "label": "Attivi"
+        },
+        {
+          "value": "suspended",
+          "label": "Sospesi"
+        },
+        {
+          "value": "unverified",
+          "label": "Email da verificare"
+        }
+      ],
+      "search": true
+    },
+    {
+      "id": "photos",
+      "title": "Foto",
+      "icon": "photo.on.rectangle",
+      "subtitle": "Approva le nuove foto",
+      "path": "/photos",
+      "kind": "photos",
+      "filters": [
+        {
+          "value": "pending",
+          "label": "Da verificare"
+        },
+        {
+          "value": "approved",
+          "label": "Approvate"
+        },
+        {
+          "value": "rejected",
+          "label": "Rifiutate"
+        },
+        {
+          "value": "all",
+          "label": "Tutte"
+        }
+      ]
+    },
+    {
+      "id": "support",
+      "title": "Assistenza",
+      "icon": "bubble.left.and.bubble.right",
+      "subtitle": "Richieste e risposte",
+      "path": "/support",
+      "kind": "support",
+      "filters": [
+        {
+          "value": "open",
+          "label": "Aperte"
+        },
+        {
+          "value": "reviewing",
+          "label": "In gestione"
+        },
+        {
+          "value": "closed",
+          "label": "Chiuse"
+        },
+        {
+          "value": "all",
+          "label": "Tutte"
+        }
+      ]
+    },
+    {
+      "id": "reports",
+      "title": "Segnalazioni",
+      "icon": "flag",
+      "subtitle": "Prenditi cura della community",
+      "path": "/reports",
+      "kind": "reports",
+      "filters": [
+        {
+          "value": "open",
+          "label": "Aperte"
+        },
+        {
+          "value": "reviewing",
+          "label": "In esame"
+        },
+        {
+          "value": "closed",
+          "label": "Chiuse"
+        },
+        {
+          "value": "all",
+          "label": "Tutte"
+        }
+      ]
+    },
+    {
+      "id": "lives",
+      "title": "Dirette",
+      "icon": "video",
+      "subtitle": "Dirette attive",
+      "path": "/lives",
+      "rows": "lives",
+      "rowTitle": [
+        "title"
+      ],
+      "rowSubtitle": [
+        "name",
+        "country",
+        "viewers",
+        "started_at"
+      ],
+      "actions": [
+        {
+          "title": "Termina diretta",
+          "path": "/lives/{id}/stop",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "reason",
+              "label": "Nota amministrativa",
+              "type": "long",
+              "default": "",
+              "required": false
+            }
+          ],
+          "danger": true
+        }
+      ]
+    },
+    {
+      "id": "stories",
+      "title": "Storie",
+      "icon": "rectangle.stack",
+      "subtitle": "Contenuti pubblicati",
+      "path": "/stories",
+      "rowTitle": [
+        "name"
+      ],
+      "rowSubtitle": [
+        "created_at",
+        "expires_at"
+      ],
+      "actions": [
+        {
+          "title": "Rimuovi storia",
+          "path": "/stories/{id}/remove",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "reason",
+              "label": "Nota amministrativa",
+              "type": "long",
+              "default": "",
+              "required": false
+            }
+          ],
+          "danger": true
+        }
+      ]
+    },
+    {
+      "id": "extra",
+      "title": "Piani Extra",
+      "icon": "star",
+      "subtitle": "Abbonamenti e concessioni",
+      "path": "/extra",
+      "owner": true,
+      "rowTitle": [
+        "name",
+        "email"
+      ],
+      "rowSubtitle": [
+        "expires_at",
+        "reason"
+      ],
+      "groups": [
+        {
+          "key": "subscriptions",
+          "title": "Abbonamenti store",
+          "rowTitle": [
+            "name"
+          ],
+          "rowSubtitle": [
+            "store",
+            "product_id",
+            "expires_at"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "statistics",
+      "title": "Statistiche",
+      "icon": "chart.bar",
+      "subtitle": "Come cresce Prism",
+      "path": "/statistics",
+      "kind": "stats"
+    },
+    {
+      "id": "app-control",
+      "title": "Avvisi e manutenzione",
+      "icon": "megaphone",
+      "subtitle": "Comunicazioni e stato dell’app",
+      "path": "/app-control",
+      "owner": true,
+      "rows": "notices",
+      "rowTitle": [
+        "title"
+      ],
+      "rowSubtitle": [
+        "message",
+        "expires_at"
+      ],
+      "summary": [
+        "maintenance"
+      ],
+      "actions": [
+        {
+          "title": "Ritira avviso",
+          "path": "/app-control/notices/{id}",
+          "method": "DELETE",
+          "fields": [],
+          "danger": true
+        }
+      ],
+      "create": [
+        {
+          "title": "Nuovo avviso",
+          "path": "/app-control/notices",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "title",
+              "label": "Titolo",
+              "type": "text",
+              "default": "",
+              "required": true
+            },
+            {
+              "key": "message",
+              "label": "Messaggio",
+              "type": "long",
+              "default": "",
+              "required": true
+            },
+            {
+              "key": "days",
+              "label": "Durata in giorni",
+              "type": "int",
+              "default": 7,
+              "required": false
+            }
+          ],
+          "danger": false
+        },
+        {
+          "title": "Manutenzione app",
+          "path": "/app-control/maintenance",
+          "method": "PUT",
+          "fields": [
+            {
+              "key": "enabled",
+              "label": "Manutenzione attiva",
+              "type": "bool",
+              "default": false,
+              "required": false,
+              "source": "maintenance.enabled"
+            },
+            {
+              "key": "title",
+              "label": "Titolo",
+              "type": "text",
+              "default": "Prism si sta aggiornando",
+              "required": true,
+              "source": "maintenance.title"
+            },
+            {
+              "key": "message",
+              "label": "Messaggio",
+              "type": "long",
+              "default": "Torniamo tra poco.",
+              "required": true,
+              "source": "maintenance.message"
+            }
+          ],
+          "danger": false
+        }
+      ]
+    },
+    {
+      "id": "prelaunch",
+      "title": "Iscrizioni anticipate",
+      "icon": "person.badge.plus",
+      "subtitle": "Iscritti e apertura dell’app",
+      "path": "/prelaunch",
+      "owner": true,
+      "rowTitle": [
+        "name",
+        "email"
+      ],
+      "rowSubtitle": [
+        "city",
+        "country",
+        "completed_at",
+        "email_verified_at"
+      ],
+      "summary": [
+        "state",
+        "eligible"
+      ],
+      "create": [
+        {
+          "title": "Lancia l’app e abilita gli iscritti",
+          "path": "/prelaunch/launch",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "expected_count",
+              "label": "Iscritti pronti",
+              "type": "hidden",
+              "default": 0,
+              "required": false,
+              "source": "eligible"
+            },
+            {
+              "key": "confirmed",
+              "label": "Confermo di voler abilitare gli iscritti",
+              "type": "bool",
+              "default": false,
+              "required": true
+            }
+          ],
+          "danger": true
+        }
+      ]
+    },
+    {
+      "id": "launch",
+      "title": "Mailing list",
+      "icon": "envelope",
+      "subtitle": "Iscritti e campagne di lancio",
+      "path": "/launch",
+      "owner": true,
+      "search": true,
+      "rowTitle": [
+        "email"
+      ],
+      "rowSubtitle": [
+        "status",
+        "confirmed_at"
+      ],
+      "summary": [
+        "stats"
+      ],
+      "actions": [
+        {
+          "title": "Elimina iscritto",
+          "path": "/launch/subscribers/{id}",
+          "method": "DELETE",
+          "fields": [],
+          "danger": true
+        }
+      ],
+      "groups": [
+        {
+          "key": "campaigns",
+          "title": "Campagne",
+          "rowTitle": [
+            "title",
+            "subject"
+          ],
+          "rowSubtitle": [
+            "status",
+            "recipient_count",
+            "sent",
+            "queued",
+            "failed"
+          ],
+          "actions": [
+            {
+              "title": "Avvia invio agli iscritti",
+              "path": "/launch/campaigns/{id}/start",
+              "method": "POST",
+              "fields": [
+                {
+                  "key": "confirmation",
+                  "label": "Scrivi INVIA per confermare",
+                  "type": "text",
+                  "default": "",
+                  "required": true
+                }
+              ],
+              "danger": true
+            },
+            {
+              "title": "Annulla campagna",
+              "path": "/launch/campaigns/{id}/cancel",
+              "method": "POST",
+              "fields": [],
+              "danger": true
+            }
+          ]
+        }
+      ],
+      "create": [
+        {
+          "title": "Modifica messaggio di lancio",
+          "path": "/launch/template",
+          "method": "PUT",
+          "fields": [
+            {
+              "key": "subject",
+              "label": "Oggetto email",
+              "type": "text",
+              "default": "",
+              "required": true,
+              "source": "template.subject"
+            },
+            {
+              "key": "title",
+              "label": "Titolo",
+              "type": "text",
+              "default": "",
+              "required": true,
+              "source": "template.title"
+            },
+            {
+              "key": "message",
+              "label": "Messaggio",
+              "type": "long",
+              "default": "",
+              "required": true,
+              "source": "template.message"
+            },
+            {
+              "key": "apple_url",
+              "label": "Link App Store",
+              "type": "text",
+              "default": "",
+              "required": false,
+              "source": "template.apple_url"
+            },
+            {
+              "key": "google_url",
+              "label": "Link Google Play",
+              "type": "text",
+              "default": "",
+              "required": false,
+              "source": "template.google_url"
+            }
+          ],
+          "danger": false
+        },
+        {
+          "title": "Invia email di prova",
+          "path": "/launch/test",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "email",
+              "label": "Indirizzo email",
+              "type": "text",
+              "default": "",
+              "required": true
+            }
+          ],
+          "danger": false
+        },
+        {
+          "title": "Crea bozza campagna",
+          "path": "/launch/campaigns",
+          "method": "POST",
+          "fields": [],
+          "danger": false
+        }
+      ]
+    },
+    {
+      "id": "administrators",
+      "title": "Amministratori",
+      "icon": "person.badge.shield.checkmark",
+      "subtitle": "Accessi e permessi",
+      "path": "/administrators",
+      "owner": true,
+      "rowTitle": [
+        "name"
+      ],
+      "rowSubtitle": [
+        "username",
+        "role",
+        "enabled"
+      ],
+      "actions": [
+        {
+          "title": "Modifica permessi",
+          "path": "/administrators/{id}",
+          "method": "PUT",
+          "fields": [
+            {
+              "key": "role",
+              "label": "Ruolo",
+              "type": "select",
+              "default": "moderator",
+              "required": false,
+              "source": "role",
+              "options": [
+                {
+                  "value": "owner",
+                  "label": "Titolare"
+                },
+                {
+                  "value": "moderator",
+                  "label": "Moderatore"
+                },
+                {
+                  "value": "support",
+                  "label": "Assistenza"
+                }
+              ]
+            },
+            {
+              "key": "enabled",
+              "label": "Accesso attivo",
+              "type": "bool",
+              "default": true,
+              "required": false,
+              "source": "enabled"
+            }
+          ],
+          "danger": false
+        },
+        {
+          "title": "Cambia password",
+          "path": "/administrators/{id}/password",
+          "method": "PUT",
+          "fields": [
+            {
+              "key": "password",
+              "label": "Nuova password (almeno 12 caratteri)",
+              "type": "password",
+              "default": "",
+              "required": true
+            }
+          ],
+          "danger": false
+        }
+      ],
+      "create": [
+        {
+          "title": "Nuovo amministratore",
+          "path": "/administrators",
+          "method": "POST",
+          "fields": [
+            {
+              "key": "name",
+              "label": "Nome",
+              "type": "text",
+              "default": "",
+              "required": true
+            },
+            {
+              "key": "username",
+              "label": "Email",
+              "type": "text",
+              "default": "",
+              "required": true
+            },
+            {
+              "key": "password",
+              "label": "Password (almeno 12 caratteri)",
+              "type": "password",
+              "default": "",
+              "required": true
+            },
+            {
+              "key": "role",
+              "label": "Ruolo",
+              "type": "select",
+              "default": "moderator",
+              "required": false,
+              "options": [
+                {
+                  "value": "owner",
+                  "label": "Titolare"
+                },
+                {
+                  "value": "moderator",
+                  "label": "Moderatore"
+                },
+                {
+                  "value": "support",
+                  "label": "Assistenza"
+                }
+              ]
+            }
+          ],
+          "danger": false
+        }
+      ]
+    },
+    {
+      "id": "audit",
+      "title": "Registro attività",
+      "icon": "clock.arrow.circlepath",
+      "subtitle": "Operazioni amministrative",
+      "path": "/audit",
+      "rowTitle": [
+        "action"
+      ],
+      "rowSubtitle": [
+        "admin_name",
+        "created_at",
+        "note"
+      ]
+    },
+    {
+      "id": "maintenance",
+      "title": "Stato del servizio",
+      "icon": "server.rack",
+      "subtitle": "Code, backup e disponibilità",
+      "path": "/maintenance",
+      "owner": true,
+      "kind": "stats"
+    }
+  ],
+  "profile": [
+    {
+      "key": "profile.name",
+      "label": "Nome",
+      "type": "text",
+      "default": "",
+      "required": true,
+      "source": "name"
+    },
+    {
+      "key": "birth_date",
+      "label": "Data di nascita",
+      "type": "date",
+      "default": "",
+      "required": true,
+      "source": "birth_date"
+    },
+    {
+      "key": "profile.bio",
+      "label": "Qualcosa di te",
+      "type": "long",
+      "default": "",
+      "required": false,
+      "source": "bio"
+    },
+    {
+      "key": "profile.looking_for",
+      "label": "Cerco",
+      "type": "multi",
+      "default": "",
+      "required": false,
+      "source": "looking_for",
+      "options": [
+        {
+          "value": "Nuove conoscenze",
+          "label": "Nuove conoscenze"
+        },
+        {
+          "value": "Amicizia",
+          "label": "Amicizia"
+        },
+        {
+          "value": "Appuntamenti",
+          "label": "Appuntamenti"
+        },
+        {
+          "value": "Una relazione",
+          "label": "Una relazione"
+        },
+        {
+          "value": "Incontri",
+          "label": "Incontri"
+        }
+      ]
+    },
+    {
+      "key": "profile.extra.photos",
+      "label": "Foto del profilo",
+      "type": "photos",
+      "default": [],
+      "required": false,
+      "source": "photos"
+    },
+    {
+      "key": "profile.extra.height",
+      "label": "Altezza (cm)",
+      "type": "number",
+      "default": "",
+      "required": false,
+      "source": "extra.height"
+    },
+    {
+      "key": "profile.extra.weight",
+      "label": "Peso (kg)",
+      "type": "number",
+      "default": "",
+      "required": false,
+      "source": "extra.weight"
+    },
+    {
+      "key": "profile.extra.identity",
+      "label": "Identità",
+      "type": "choice",
+      "default": "",
+      "required": false,
+      "source": "extra.identity",
+      "options": [
+        {
+          "value": "Uomo",
+          "label": "Uomo"
+        },
+        {
+          "value": "Donna",
+          "label": "Donna"
+        },
+        {
+          "value": "Uomo trans",
+          "label": "Uomo trans"
+        },
+        {
+          "value": "Donna trans",
+          "label": "Donna trans"
+        },
+        {
+          "value": "Non binario",
+          "label": "Non binario"
+        },
+        {
+          "value": "Altro",
+          "label": "Altro"
+        }
+      ]
+    },
+    {
+      "key": "profile.extra.position",
+      "label": "Ruolo",
+      "type": "choice",
+      "default": "",
+      "required": false,
+      "source": "extra.position",
+      "options": [
+        {
+          "value": "Attivo",
+          "label": "Attivo"
+        },
+        {
+          "value": "Passivo",
+          "label": "Passivo"
+        },
+        {
+          "value": "Versatile",
+          "label": "Versatile"
+        },
+        {
+          "value": "Versatile attivo",
+          "label": "Versatile attivo"
+        },
+        {
+          "value": "Versatile passivo",
+          "label": "Versatile passivo"
+        },
+        {
+          "value": "Side",
+          "label": "Side"
+        }
+      ]
+    },
+    {
+      "key": "profile.extra.tribe",
+      "label": "Community",
+      "type": "community",
+      "default": "",
+      "required": false,
+      "source": "extra.tribe",
+      "options": [
+        {
+          "value": "Orso",
+          "label": "Orso"
+        },
+        {
+          "value": "Aspetto curato",
+          "label": "Aspetto curato"
+        },
+        {
+          "value": "Daddy",
+          "label": "Daddy"
+        },
+        {
+          "value": "Riservato",
+          "label": "Riservato"
+        },
+        {
+          "value": "Nerd",
+          "label": "Nerd"
+        },
+        {
+          "value": "Sportivo",
+          "label": "Sportivo"
+        },
+        {
+          "value": "Vestiti in pelle",
+          "label": "Vestiti in pelle"
+        },
+        {
+          "value": "Lontra",
+          "label": "Lontra"
+        },
+        {
+          "value": "HIV+",
+          "label": "HIV+"
+        },
+        {
+          "value": "Robusto",
+          "label": "Robusto"
+        },
+        {
+          "value": "Trans",
+          "label": "Trans"
+        },
+        {
+          "value": "Twink",
+          "label": "Twink"
+        }
+      ]
+    },
+    {
+      "key": "profile.extra.relationship",
+      "label": "Situazione sentimentale",
+      "type": "choice",
+      "default": "",
+      "required": false,
+      "source": "extra.relationship",
+      "options": [
+        {
+          "value": "Single",
+          "label": "Single"
+        },
+        {
+          "value": "In una relazione",
+          "label": "In una relazione"
+        },
+        {
+          "value": "Relazione aperta",
+          "label": "Relazione aperta"
+        },
+        {
+          "value": "Sposato",
+          "label": "Sposato"
+        },
+        {
+          "value": "Altro",
+          "label": "Altro"
+        }
+      ]
+    },
+    {
+      "key": "profile.instagram",
+      "label": "Instagram",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "source": "instagram"
+    },
+    {
+      "key": "profile.facebook",
+      "label": "Facebook",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "source": "facebook"
+    },
+    {
+      "key": "profile.show_online",
+      "label": "Mostra stato online",
+      "type": "bool",
+      "default": true,
+      "required": false,
+      "source": "show_online"
+    },
+    {
+      "key": "profile.show_last_seen",
+      "label": "Mostra ultimo accesso",
+      "type": "bool",
+      "default": true,
+      "required": false,
+      "source": "show_last_seen"
+    },
+    {
+      "key": "profile.show_distance",
+      "label": "Mostra distanza",
+      "type": "bool",
+      "default": true,
+      "required": false,
+      "source": "show_distance"
+    },
+    {
+      "key": "availability.kind",
+      "label": "Libero adesso / nota",
+      "type": "select",
+      "default": "none",
+      "required": false,
+      "source": "availability.kind",
+      "options": [
+        {
+          "value": "none",
+          "label": "Non attivo"
+        },
+        {
+          "value": "coffee",
+          "label": "Un caffè"
+        },
+        {
+          "value": "chat",
+          "label": "Due chiacchiere"
+        },
+        {
+          "value": "walk",
+          "label": "Una passeggiata"
+        },
+        {
+          "value": "tonight",
+          "label": "Stasera"
+        },
+        {
+          "value": "note",
+          "label": "Solo una nota"
+        }
+      ]
+    },
+    {
+      "key": "availability.note",
+      "label": "Nota (massimo 60 caratteri)",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "source": "availability.note"
+    },
+    {
+      "key": "availability.expires_at",
+      "label": "Scadenza",
+      "type": "datetime",
+      "default": "",
+      "required": false,
+      "source": "availability.expires_at"
+    },
+    {
+      "key": "reason",
+      "label": "Nota amministrativa",
+      "type": "long",
+      "default": "",
+      "required": false
+    }
+  ],
+  "userActions": [
+    {
+      "title": "Sospendi account",
+      "path": "/users/{id}/suspend",
+      "method": "POST",
+      "fields": [
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": true
+    },
+    {
+      "title": "Riattiva account",
+      "path": "/users/{id}/restore",
+      "method": "POST",
+      "fields": [
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": false
+    }
+  ],
+  "ownerActions": [
+    {
+      "title": "Azzera attesa Tap",
+      "path": "/users/{id}/reset-taps",
+      "method": "POST",
+      "fields": [
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": false
+    },
+    {
+      "title": "Azzera invio regali",
+      "path": "/users/{id}/reset-gifts",
+      "method": "POST",
+      "fields": [
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": false
+    },
+    {
+      "title": "Assegna Extra",
+      "path": "/users/{id}/extra",
+      "method": "PUT",
+      "fields": [
+        {
+          "key": "days",
+          "label": "Giorni Extra",
+          "type": "int",
+          "default": 30,
+          "required": false
+        },
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": false
+    },
+    {
+      "title": "Revoca Extra manuale",
+      "path": "/users/{id}/extra",
+      "method": "DELETE",
+      "fields": [
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": true
+    },
+    {
+      "title": "Disponibilità vantaggi Extra",
+      "path": "/users/{id}/extra-override",
+      "method": "PUT",
+      "fields": [
+        {
+          "key": "disabled",
+          "label": "Disabilita vantaggi Extra",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": false
+    },
+    {
+      "title": "Elimina account definitivamente",
+      "path": "/users/{id}/delete",
+      "method": "POST",
+      "fields": [
+        {
+          "key": "confirmation",
+          "label": "Scrivi l’email dell’utente per confermare",
+          "type": "text",
+          "default": "",
+          "required": true
+        },
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": "",
+          "required": false
+        }
+      ],
+      "danger": true
+    }
+  ],
+  "labels": {
+    "users": "Utenti",
+    "new_users": "Nuovi iscritti · 7 giorni",
+    "online": "Online",
+    "suspended": "Sospesi",
+    "reports": "Segnalazioni",
+    "photos": "Foto da verificare",
+    "support": "Assistenza",
+    "unverified": "Email da verificare",
+    "push_queue": "Push in coda",
+    "email_queue": "Email in coda",
+    "daily_active": "Attivi oggi",
+    "monthly_active": "Attivi nel mese",
+    "extra": "Utenti Extra",
+    "messages_today": "Messaggi oggi",
+    "stories": "Storie attive",
+    "subscriptions": "Abbonamenti",
+    "name": "Nome",
+    "email": "Email",
+    "birth_date": "Data di nascita",
+    "bio": "Qualcosa di te",
+    "looking_for": "Cerco",
+    "height": "Altezza · cm",
+    "weight": "Peso · kg",
+    "identity": "Identità",
+    "position": "Ruolo",
+    "tribe": "Community",
+    "relationship": "Situazione sentimentale",
+    "status": "Stato",
+    "created_at": "Creato il",
+    "updated_at": "Aggiornato il",
+    "last_seen": "Ultimo accesso",
+    "show_online": "Stato online visibile",
+    "show_last_seen": "Ultimo accesso visibile",
+    "show_distance": "Distanza visibile",
+    "role": "Ruolo",
+    "enabled": "Attivo",
+    "confirmed": "Confermati",
+    "pending": "In attesa",
+    "closed": "Chiusa",
+    "open": "Aperta",
+    "reviewing": "In gestione",
+    "reason": "Motivo",
+    "note": "Nota",
+    "expires_at": "Scadenza",
+    "user_id": "ID utente",
+    "id": "ID",
+    "photo_hash": "Riferimento foto",
+    "photo_reviews": "Verifica foto",
+    "gift_sending": "Invio regali",
+    "availability": "Libero adesso / nota",
+    "entitlement": "Piano",
+    "manual_extra": "Extra manuale",
+    "reports_received": "Segnalazioni ricevute",
+    "completed_at": "Profilo completato",
+    "email_verified_at": "Email verificata",
+    "eligible": "Iscritti pronti",
+    "maintenance": "Manutenzione",
+    "database_bytes": "Dimensione database",
+    "disk_free": "Spazio libero",
+    "disk_total": "Spazio totale",
+    "queues": "Code",
+    "errors": "Errori recenti",
+    "stores": "Store",
+    "backup": "Backup",
+    "version": "Versione",
+    "sent": "Inviate",
+    "queued": "In coda",
+    "failed": "Non inviate",
+    "recipient_count": "Destinatari",
+    "kind": "Tipo",
+    "plan": "Piano",
+    "country": "Paese",
+    "city": "Città",
+    "state": "Stato del lancio",
+    "launched_at": "Lanciata il",
+    "first_app_at": "Primo accesso nell’app",
+    "subscribed_at": "Iscrizione",
+    "source": "Origine",
+    "extra_granted_at": "Extra assegnato il",
+    "count": "Totale",
+    "title": "Titolo",
+    "message": "Messaggio",
+    "subject": "Oggetto",
+    "active": "Attivo",
+    "platform": "Piattaforma",
+    "store": "Store",
+    "verified_at": "Verificato il",
+    "action": "Operazione",
+    "target_name": "Profilo segnalato",
+    "reporter_name": "Segnalato da",
+    "admin_note": "Nota amministrativa",
+    "admin_name": "Amministratore",
+    "started_at": "Inizio",
+    "viewers": "Spettatori",
+    "email_pending": "Email in attesa",
+    "push_pending": "Push in attesa"
+  }
+}
