@@ -1,18 +1,22 @@
-# Prism Admin 2.0.1 — iOS nativo
+# ATX Panel iOS — Build 1 (SwiftUI nativa)
 
-Interfaccia SwiftUI, API URLSession, sessione in Keychain, notifiche Firebase/APNs.
-Bundle identifier: app.prism.admin. Team: B8SC92LPR5. iOS minimo: 16.
+Progetto iniziale iOS **senza WebView**. Usa le API PHP AtlantiX esistenti.
 
-## Aggiornamento Xcode Cloud
-1. Nel repository PRIVATO già collegato a PrismAdmin, sostituisci il progetto con tutti i file di questa cartella. Mantieni la struttura: PRISM, Config, ci_scripts e PrismAdmin.xcodeproj sono affiancati alla radice.
-2. Rimuovi i vecchi PRISM/PrismViewController.swift e PRISM/LocalAccount.swift. Non sono più referenziati dal progetto.
-3. Includi nel commit il workspace condiviso e Package.resolved dentro PrismAdmin.xcodeproj; Firebase è fissato alla versione 11.15.0.
-4. Avvia il workflow esistente Xcode Cloud, con lo scheme PrismAdmin e la distribuzione TestFlight per il tuo account.
-5. Versione 2.0.1; build locale 10, sostituita dal numero progressivo CI_BUILD_NUMBER in Xcode Cloud.
+## Installazione
 
-L’identificativo dell’app, il file GoogleService-Info.plist e la capability push sono gli stessi della precedente app admin. Accedi con le credenziali del pannello; la precedente sessione WebView non viene trasferita. La nuova sessione è protetta in Keychain e scade secondo la durata definita dal server (8 ore).
+1. Caricare `server_optional/csrf.php` nel server come `api/mobile/csrf.php` (creare la cartella `mobile`). Non modificare `config.php`.
+2. Caricare l'intera cartella `ATXPanel_iOS` su GitHub e aprire `ATXPanel.xcodeproj` su Xcode/Xcloud.
+3. Selezionare il proprio Team di firma in Signing & Capabilities, impostare un bundle identifier disponibile e compilare su iPhone.
 
-## Controlli sul dispositivo
-Apri l’app a freddo; accedi; apri e modifica un profilo; verifica una foto; rispondi a un ticket. Porta l’app in background e prova le notifiche di assistenza, foto e segnalazioni, controllando anche l’apertura della sezione giusta.
+## Funzioni presenti
 
-Il progetto è stato controllato staticamente in questo ambiente, che non dispone di macOS/Xcode. Non è incluso un IPA firmato e non è stato eseguito un test su iPhone. La compilazione Xcode Cloud e la prova TestFlight restano necessarie.
+Login username/password/codice AtlantiX con sessione PHP e CSRF, dashboard, elenco linee (prime 50 + ricerca), connessioni, reseller, movimenti crediti, logout. Le liste sono **in sola lettura** in questa build. Nessuna password o codice è salvato in UserDefaults o inserito nel sorgente.
+
+## Limiti e verifiche
+
+- Non testato su un server autenticato né compilato con Xcode in questo ambiente. La compatibilità effettiva richiede test su Xcloud.
+- Se il server richiede 2FA per un account, questa build lo segnala ma non implementa il secondo passaggio.
+- I permessi restano applicati dalle API server, non dal client.
+- Le schermate di creazione/rinnovo/modifica sono previste per la build successiva dopo test delle operazioni in ambiente sicuro.
+- Non caricare file di configurazione NXT o segreti nell'app.
+- La funzione `api/auth/logout.php` effettua redirect: URLSession segue il redirect e la sessione viene invalidata lato server.

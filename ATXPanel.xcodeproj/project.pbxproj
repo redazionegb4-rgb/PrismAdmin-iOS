@@ -1,0 +1,28 @@
+// !$*UTF8*$!
+{
+ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+ 264EE21F159247B78F0558C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ATXPanelApp.swift; sourceTree = "<group>"; };
+ EFBDD86D0597455B86D81455 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ATXAPI.swift; sourceTree = "<group>"; };
+ ABCDEF1234567890ABCDEF12 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ATXModules.swift; sourceTree = "<group>"; };
+ DF61CEED10474B5E8ED48160 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+ A1A1A1A1A1A1A1A1A1A1A1A1 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+ F4F3638931E04D3FA68B8BDD = {isa = PBXFileReference; explicitFileType = wrapper.application; path = ATXPanel.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ B2B2B2B2B2B2B2B2B2B2B2B2 = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A1A1; };
+ FE285FAE193A4396A0200B62 = {isa = PBXBuildFile; fileRef = 264EE21F159247B78F0558C2; };
+ 1F325D8412474EE988F63AA3 = {isa = PBXBuildFile; fileRef = EFBDD86D0597455B86D81455; };
+ ABCDEF1234567890ABCDEF13 = {isa = PBXBuildFile; fileRef = ABCDEF1234567890ABCDEF12; };
+ 829B99CA62824861AC97B654 = {isa = PBXBuildFile; fileRef = DF61CEED10474B5E8ED48160; };
+ E9F75ACD748E48F9A3676C96 = {isa = PBXGroup; children = (4D707A91C5BA4E7883E9A31B, E1BD5E639E7C4399B04AC29C); sourceTree = "<group>"; };
+ 4D707A91C5BA4E7883E9A31B = {isa = PBXGroup; children = (264EE21F159247B78F0558C2, EFBDD86D0597455B86D81455, DF61CEED10474B5E8ED48160, ABCDEF1234567890ABCDEF12, A1A1A1A1A1A1A1A1A1A1A1A1); path = ATXPanel; sourceTree = "<group>"; };
+ E1BD5E639E7C4399B04AC29C = {isa = PBXGroup; children = (F4F3638931E04D3FA68B8BDD); name = Products; sourceTree = "<group>"; };
+ A13FD772970C4FD99011A571 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (FE285FAE193A4396A0200B62, 1F325D8412474EE988F63AA3, 829B99CA62824861AC97B654, ABCDEF1234567890ABCDEF13); runOnlyForDeploymentPostprocessing = 0; };
+ C3C3C3C3C3C3C3C3C3C3C3C3 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B2B2B2B2B2B2B2B2B2B2B2B2); runOnlyForDeploymentPostprocessing = 0; };
+ 6B0F4ABAA9C8419A9F01E89A = {isa = PBXNativeTarget; buildConfigurationList = E2F05BCFCF5240B1ADEED1A2; buildPhases = (A13FD772970C4FD99011A571, C3C3C3C3C3C3C3C3C3C3C3C3); buildRules = (); dependencies = (); name = ATXPanel; productName = ATXPanel; productReference = F4F3638931E04D3FA68B8BDD; productType = "com.apple.product-type.application"; };
+ B6B0A6410BD642559FC0B970 = {isa = PBXProject; attributes = {LastUpgradeCheck = 1600; TargetAttributes = {6B0F4ABAA9C8419A9F01E89A = {CreatedOnToolsVersion = 16.0; }; }; }; buildConfigurationList = 1D2FAF45A2674625A98919F6; compatibilityVersion = "Xcode 14.0"; developmentRegion = it; knownRegions = (it, en, Base); mainGroup = E9F75ACD748E48F9A3676C96; productRefGroup = E1BD5E639E7C4399B04AC29C; projectDirPath = ""; projectRoot = ""; targets = (6B0F4ABAA9C8419A9F01E89A); };
+ 67032ABFD8A94BF3B5AECC94 = {isa = XCBuildConfiguration; buildSettings = {SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos;}; name = Debug; };
+ 09BCECD87E304EA98498566D = {isa = XCBuildConfiguration; buildSettings = {SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos;}; name = Release; };
+ 6053B9E714874C4CB8EC26CB = {isa = XCBuildConfiguration; buildSettings = {SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 16.0; TARGETED_DEVICE_FAMILY = "1"; PRODUCT_BUNDLE_IDENTIFIER = biz.axdash.atxpanel; GENERATE_INFOPLIST_FILE = YES; MARKETING_VERSION = 1.0.0; CURRENT_PROJECT_VERSION = 7; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; INFOPLIST_KEY_CFBundleIconName = AppIcon; INFOPLIST_KEY_CFBundleDisplayName = "ATX Panel"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CODE_SIGN_STYLE = Automatic; PRODUCT_NAME = ATXPanel; EXECUTABLE_NAME = ATXPanel; MACH_O_TYPE = mh_execute; WRAPPER_EXTENSION = app;}; name = Debug; };
+ 2CC164A1304A4B4DAC370536 = {isa = XCBuildConfiguration; buildSettings = {SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 16.0; TARGETED_DEVICE_FAMILY = "1"; PRODUCT_BUNDLE_IDENTIFIER = biz.axdash.atxpanel; GENERATE_INFOPLIST_FILE = YES; MARKETING_VERSION = 1.0.0; CURRENT_PROJECT_VERSION = 7; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; INFOPLIST_KEY_CFBundleIconName = AppIcon; INFOPLIST_KEY_CFBundleDisplayName = "ATX Panel"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CODE_SIGN_STYLE = Automatic; PRODUCT_NAME = ATXPanel; EXECUTABLE_NAME = ATXPanel; MACH_O_TYPE = mh_execute; WRAPPER_EXTENSION = app;}; name = Release; };
+ 1D2FAF45A2674625A98919F6 = {isa = XCConfigurationList; buildConfigurations = (67032ABFD8A94BF3B5AECC94, 09BCECD87E304EA98498566D); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+ E2F05BCFCF5240B1ADEED1A2 = {isa = XCConfigurationList; buildConfigurations = (6053B9E714874C4CB8EC26CB, 2CC164A1304A4B4DAC370536); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+ }; rootObject = B6B0A6410BD642559FC0B970; }

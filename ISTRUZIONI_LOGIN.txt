@@ -1,0 +1,4 @@
+1. Carica server_optional/csrf.php sul server in /api/mobile/csrf.php (crea la cartella mobile se manca).
+2. Verifica da browser https://cms.axdash.biz/api/mobile/csrf.php : deve restituire JSON success:true e data.csrf. NON condividere il token.
+3. Aggiorna il repository con i file del progetto iOS e ricompila.
+4. Elimina gli script diagnostici precedenti dal server.

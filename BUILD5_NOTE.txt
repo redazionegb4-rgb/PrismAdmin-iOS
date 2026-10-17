@@ -1,0 +1,1 @@
+ATX Panel Build 5: iOS only; version 1.0.0 (5); bundled AppIcon 1024x1024 RGB; asset catalog added to PBXResourcesBuildPhase; CFBundleIconName configured. Replace all repository project files and create a NEW archive. Not compiled with Xcode in this environment.
