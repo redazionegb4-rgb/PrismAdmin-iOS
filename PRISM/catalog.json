@@ -36,6 +36,186 @@
       "search": true
     },
     {
+      "id": "badges",
+      "title": "Badge",
+      "icon": "checkmark.seal",
+      "subtitle": "Verificato, Pioniere ed Extra",
+      "path": "/badges",
+      "owner": true,
+      "search": true,
+      "filterParam": "kind",
+      "filters": [
+        {
+          "value": "all",
+          "label": "Tutti"
+        },
+        {
+          "value": "verified",
+          "label": "Verificato"
+        },
+        {
+          "value": "pioneer",
+          "label": "Pioniere"
+        },
+        {
+          "value": "extra",
+          "label": "Extra"
+        }
+      ],
+      "rowTitle": [
+        "name"
+      ],
+      "rowSubtitle": [
+        "email",
+        "badge_labels"
+      ],
+      "actions": [
+        {
+          "title": "Assegna badge",
+          "path": "/users/{id}/badges",
+          "method": "PUT",
+          "fields": [
+            {
+              "key": "kind",
+              "label": "Badge",
+              "type": "select",
+              "default": "verified",
+              "options": [
+                {
+                  "value": "verified",
+                  "label": "Verificato"
+                },
+                {
+                  "value": "pioneer",
+                  "label": "Pioniere"
+                },
+                {
+                  "value": "extra",
+                  "label": "Extra"
+                }
+              ]
+            },
+            {
+              "key": "days",
+              "label": "Durata in giorni (0 = senza scadenza)",
+              "type": "int",
+              "default": 0
+            },
+            {
+              "key": "verification_method",
+              "label": "Verifica identità — solo per Verificato",
+              "type": "select",
+              "default": "none",
+              "options": [
+                {
+                  "value": "none",
+                  "label": "Nessuna verifica"
+                },
+                {
+                  "value": "video",
+                  "label": "Videochiamata"
+                },
+                {
+                  "value": "in_person",
+                  "label": "Di persona"
+                },
+                {
+                  "value": "document",
+                  "label": "Documento verificato"
+                }
+              ]
+            },
+            {
+              "key": "confirmed_verification",
+              "label": "Confermo di aver verificato realmente l’identità",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "reason",
+              "label": "Nota amministrativa",
+              "type": "long",
+              "default": ""
+            }
+          ],
+          "help": "Verificato richiede un controllo reale dell’identità. Il badge Extra segue il piano e non attiva vantaggi. 0 giorni: nessuna scadenza aggiuntiva."
+        },
+        {
+          "title": "Revoca badge",
+          "path": "/users/{id}/badges/revoke",
+          "method": "POST",
+          "danger": true,
+          "fields": [
+            {
+              "key": "kind",
+              "label": "Badge",
+              "type": "select",
+              "default": "verified",
+              "options": [
+                {
+                  "value": "verified",
+                  "label": "Verificato"
+                },
+                {
+                  "value": "pioneer",
+                  "label": "Pioniere"
+                },
+                {
+                  "value": "extra",
+                  "label": "Extra"
+                }
+              ]
+            },
+            {
+              "key": "reason",
+              "label": "Nota amministrativa",
+              "type": "long",
+              "default": ""
+            }
+          ],
+          "help": "La revoca prevale anche sui badge automatici."
+        }
+      ]
+    },
+    {
+      "id": "verification",
+      "title": "Verifica profili",
+      "icon": "checkmark.seal",
+      "subtitle": "Selfie e richieste del badge Verificato",
+      "path": "/verification",
+      "owner": true,
+      "filters": [
+        {
+          "value": "pending",
+          "label": "In attesa"
+        },
+        {
+          "value": "approved",
+          "label": "Approvate"
+        },
+        {
+          "value": "rejected",
+          "label": "Rifiutate"
+        },
+        {
+          "value": "expired",
+          "label": "Scadute"
+        },
+        {
+          "value": "all",
+          "label": "Tutte"
+        }
+      ],
+      "rowTitle": [
+        "name"
+      ],
+      "rowSubtitle": [
+        "email",
+        "status",
+        "submitted_at"
+      ]
+    },
+    {
       "id": "photos",
       "title": "Foto",
       "icon": "photo.on.rectangle",
@@ -1119,6 +1299,111 @@
         }
       ],
       "danger": true
+    },
+    {
+      "title": "Assegna badge",
+      "path": "/users/{id}/badges",
+      "method": "PUT",
+      "fields": [
+        {
+          "key": "kind",
+          "label": "Badge",
+          "type": "select",
+          "default": "verified",
+          "options": [
+            {
+              "value": "verified",
+              "label": "Verificato"
+            },
+            {
+              "value": "pioneer",
+              "label": "Pioniere"
+            },
+            {
+              "value": "extra",
+              "label": "Extra"
+            }
+          ]
+        },
+        {
+          "key": "days",
+          "label": "Durata in giorni (0 = senza scadenza)",
+          "type": "int",
+          "default": 0
+        },
+        {
+          "key": "verification_method",
+          "label": "Verifica identità — solo per Verificato",
+          "type": "select",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "Nessuna verifica"
+            },
+            {
+              "value": "video",
+              "label": "Videochiamata"
+            },
+            {
+              "value": "in_person",
+              "label": "Di persona"
+            },
+            {
+              "value": "document",
+              "label": "Documento verificato"
+            }
+          ]
+        },
+        {
+          "key": "confirmed_verification",
+          "label": "Confermo di aver verificato realmente l’identità",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": ""
+        }
+      ],
+      "help": "Verificato richiede un controllo reale dell’identità. Il badge Extra segue il piano e non attiva vantaggi. 0 giorni: nessuna scadenza aggiuntiva."
+    },
+    {
+      "title": "Revoca badge",
+      "path": "/users/{id}/badges/revoke",
+      "method": "POST",
+      "danger": true,
+      "fields": [
+        {
+          "key": "kind",
+          "label": "Badge",
+          "type": "select",
+          "default": "verified",
+          "options": [
+            {
+              "value": "verified",
+              "label": "Verificato"
+            },
+            {
+              "value": "pioneer",
+              "label": "Pioniere"
+            },
+            {
+              "value": "extra",
+              "label": "Extra"
+            }
+          ]
+        },
+        {
+          "key": "reason",
+          "label": "Nota amministrativa",
+          "type": "long",
+          "default": ""
+        }
+      ],
+      "help": "La revoca prevale anche sui badge automatici."
     }
   ],
   "labels": {
@@ -1164,7 +1449,7 @@
     "open": "Aperta",
     "reviewing": "In gestione",
     "reason": "Motivo",
-    "note": "Nota",
+    "note": "Messaggio per l’utente",
     "expires_at": "Scadenza",
     "user_id": "ID utente",
     "id": "ID",
@@ -1208,7 +1493,7 @@
     "active": "Attivo",
     "platform": "Piattaforma",
     "store": "Store",
-    "verified_at": "Verificato il",
+    "verified_at": "Identità verificata il",
     "action": "Operazione",
     "target_name": "Profilo segnalato",
     "reporter_name": "Segnalato da",
@@ -1217,6 +1502,20 @@
     "started_at": "Inizio",
     "viewers": "Spettatori",
     "email_pending": "Email in attesa",
-    "push_pending": "Push in attesa"
+    "push_pending": "Push in attesa",
+    "badges": "Badge",
+    "badges_admin": "Gestione badge",
+    "effective": "Badge attivi",
+    "public": "Visibili sul profilo",
+    "overrides": "Assegnazioni e revoche",
+    "preferences": "Visibilità",
+    "show_extra": "Mostra badge Extra",
+    "badge_labels": "Badge",
+    "verification_method": "Metodo verifica",
+    "code": "Codice sul foglio",
+    "selfie": "Selfie di verifica",
+    "reference_photo": "Foto del profilo",
+    "submitted_at": "Inviata il",
+    "reviewed_at": "Gestita il"
   }
 }

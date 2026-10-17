@@ -15,7 +15,7 @@ import ImageIO
      NavigationStack { NativeModule(store:store,module:Catalog.module("photos")) }.tabItem { Label("Foto",systemImage:"photo.on.rectangle") }.badge((store.counts["photos"] as? Int) ?? 0).tag("photos")
     }
     NavigationStack { NativeModule(store:store,module:Catalog.module("support")) }.tabItem { Label("Assistenza",systemImage:"bubble.left.and.bubble.right") }.badge((store.counts["support"] as? Int) ?? 0).tag("support")
-    NavigationStack(path:$store.managementPath) { NativeManagement(store:store).navigationDestination(for:String.self) { id in NativeModule(store:store,module:Catalog.module(id)) } }.tabItem { Label("Gestione",systemImage:"slider.horizontal.3") }.tag("more")
+    NavigationStack(path:$store.managementPath) { NativeManagement(store:store).navigationDestination(for:String.self) { id in NativeModule(store:store,module:Catalog.module(id)) } }.tabItem { Label("Gestione",systemImage:"slider.horizontal.3") }.badge(((store.counts["reports"] as? Int) ?? 0) + ((store.counts["verification"] as? Int) ?? 0)).tag("more")
    }.tint(gold) }
   }.preferredColorScheme(.dark).environmentObject(store)
    .task { await store.restore() }
@@ -52,7 +52,7 @@ import ImageIO
   ScrollView { VStack(alignment:.leading,spacing:22) {
    HStack { VStack(alignment:.leading,spacing:6) { Text("Ciao, \(store.name)").font(.largeTitle.bold());Text("La tua community, a colpo d’occhio.").foregroundStyle(.secondary) };Spacer();Image(systemName:"shield.lefthalf.filled").font(.title).foregroundStyle(gold) }
    Text("DA GESTIRE").font(.caption.weight(.semibold)).tracking(2).foregroundStyle(gold)
-   ForEach(["photos","reports","support"],id:\.self) { id in let m=Catalog.module(id)
+   ForEach((["photos","reports","support"] + (store.role == "owner" ? ["verification"] : [])),id:\.self) { id in let m=Catalog.module(id)
     NavigationLink { NativeModule(store:store,module:m) } label: { HStack(spacing:16) { Image(systemName:string(m["icon"])).frame(width:44,height:44).foregroundStyle(gold).background(gold.opacity(0.1),in:RoundedRectangle(cornerRadius:14));VStack(alignment:.leading) {Text(string(m["title"])).font(.headline);Text(string(m["subtitle"])).font(.caption).foregroundStyle(.secondary)};Spacer();Text(string(store.counts[id] ?? 0)).font(.title2.bold()).foregroundStyle(gold);Image(systemName:"chevron.right").font(.caption) }.padding(18).background(panel,in:RoundedRectangle(cornerRadius:22)) }.buttonStyle(.plain)
    }
    if !error.isEmpty { RetryBox(text:error) { Task {await load()} } }
@@ -130,10 +130,11 @@ extension Dictionary where Key==String,Value==Any { var idString:String {string(
  @ViewBuilder func rowView(_ row:Object)->some View {
   if moduleID=="users" {NavigationLink {NativeUser(store:store,uid:string(row["id"]))}label:{ModuleRow(module:["rowTitle":["name"],"rowSubtitle":["email","suspension_reason"]],row:row)}}
   else if moduleID=="photos" {NavigationLink {NativePhotoReview(store:store,row:row)}label:{HStack(spacing:14){NativePhoto(source:string(row["photo"])).frame(width:64,height:76).clipShape(RoundedRectangle(cornerRadius:14));VStack(alignment:.leading){Text(string(row["name"])).font(.headline);Text(Catalog.display(row["status"])).font(.caption).foregroundStyle(gold)}}}}
+  else if moduleID=="verification" {NavigationLink{NativeVerification232(store:store,rid:string(row["id"]))}label:{ModuleRow(module:module,row:row)}}
   else if moduleID=="support" {NavigationLink{NativeTicket(store:store,tid:string(row["id"]))}label:{ModuleRow(module:["rowTitle":["subject"],"rowSubtitle":["name","status","updated_at"]],row:row)}}
   else {NavigationLink{NativeRowDetail(store:store,module:module,row:row)}label:{ModuleRow(module:moduleID=="reports" ? ["id":"reports","rowTitle":["target_name"],"rowSubtitle":["reason","status"]] : module,row:row)}}
  }
- func load(more:Bool=false) async {guard !busy else{if !more{reloadQueued=true};return};busy=true;let revision=store.contentRevision;defer{busy=false;if reloadQueued{reloadQueued=false;if visible{Task{await load()}}}};let next=more ? offset+25 : 0;var components=URLComponents();components.queryItems=[URLQueryItem(name:"offset",value:String(next)),URLQueryItem(name:"q",value:q),URLQueryItem(name:"status",value:filter.isEmpty ? "all":filter)];do{let response=try await store.request(string(module["path"])+(components.string ?? ""));guard revision==store.contentRevision else{reloadQueued=true;return};data=response;let new=objects(response[string(module["rows"] ?? "items")]);rows=more ? rows+new:new;offset=next;error=""}catch{self.error=error.localizedDescription}}
+ func load(more:Bool=false) async {guard !busy else{if !more{reloadQueued=true};return};busy=true;let revision=store.contentRevision;defer{busy=false;if reloadQueued{reloadQueued=false;if visible{Task{await load()}}}};let next=more ? offset+25 : 0;var components=URLComponents();components.queryItems=[URLQueryItem(name:"offset",value:String(next)),URLQueryItem(name:"q",value:q),URLQueryItem(name:string(module["filterParam"] ?? "status"),value:filter.isEmpty ? "all":filter)];do{let response=try await store.request(string(module["path"])+(components.string ?? ""));guard revision==store.contentRevision else{reloadQueued=true;return};data=response;let new=objects(response[string(module["rows"] ?? "items")]);rows=more ? rows+new:new;offset=next;error=""}catch{self.error=error.localizedDescription}}
 }
 extension Dictionary where Key==String,Value==Any {var optionValue:String{string(self["value"])}}
 @MainActor struct ModuleRow:View {let module:Object,row:Object;var body:some View {HStack(spacing:14){Image(systemName:string(module["icon"] ?? "person.crop.circle")).foregroundStyle(gold).frame(width:32);VStack(alignment:.leading,spacing:6){Text((module["rowTitle"] as? [String] ?? ["name","title","subject","email","action"]).compactMap{let s=string(row[$0]);return s.isEmpty ? nil:s}.first ?? "Elemento").font(.headline);ForEach(module["rowSubtitle"] as? [String] ?? ["status","created_at"],id:\.self){key in if let v=row[key],!(v is NSNull){Text(Catalog.display(v)).font(.caption).foregroundStyle(.secondary).lineLimit(2)}}}.padding(.vertical,6)}}}
@@ -257,3 +258,26 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
  var body:some View { ZStack{panel;if let image=image{Image(uiImage:image).resizable().scaledToFit()}else{Image(systemName:"photo").foregroundStyle(.secondary)}}.task(id:source){image=nil;if source.hasPrefix("data:"),let split=source.firstIndex(of:","),let bytes=Data(base64Encoded:String(source[source.index(after:split)...])){image=thumbnail(bytes)}else if let url=URL(string:source),url.scheme=="https",["api.prismdating.app","prismdating.app"].contains(url.host ?? ""){if let (bytes,_)=try? await URLSession.shared.data(from:url){image=thumbnail(bytes)}}} }
 }
 func thumbnail(_ data:Data)->UIImage? {guard let source=CGImageSourceCreateWithData(data as CFData,nil),let image=CGImageSourceCreateThumbnailAtIndex(source,0,[kCGImageSourceCreateThumbnailFromImageAlways:true,kCGImageSourceThumbnailMaxPixelSize:1600,kCGImageSourceCreateThumbnailWithTransform:true] as CFDictionary)else{return nil};return UIImage(cgImage:image)}
+
+@MainActor struct NativeVerification232:View {
+ @ObservedObject var store:AdminStore
+ let rid:String
+ @State private var data:Object=[:]
+ @State private var error=""
+ @State private var form:NativeFormSpec?
+ @State private var completed=false
+ @Environment(\.dismiss) private var dismiss
+ var body:some View {List{
+  if !error.isEmpty{RetryBox(text:error){Task{await load()}}}
+  if !data.isEmpty{
+   Section{Text(string(data["name"])).font(.title2.bold());Text(string(data["email"])).foregroundStyle(.secondary);Text("Codice sul foglio: Prism "+string(data["code"])).font(.headline).foregroundStyle(gold)}
+   if string(data["status"])=="pending"{
+    Section("Foto del profilo approvata"){NativePhoto(source:string(data["reference_photo"])).frame(maxWidth:.infinity).frame(height:210).clipShape(RoundedRectangle(cornerRadius:18))}
+    Section("Selfie ricevuto"){NativePhoto(source:string(data["selfie"])).frame(maxWidth:.infinity).frame(height:260).clipShape(RoundedRectangle(cornerRadius:18))}
+    Section{Text("Confronta viso, foto del profilo e codice scritto sul foglio. Il selfie verrà eliminato dopo la decisione.").font(.caption).foregroundStyle(.secondary);Button("Approva profilo"){form=NativeFormSpec(action:verificationAction232("approved"),context:data)}.padding(.vertical,8);Button("Rifiuta con un motivo",role:.destructive){form=NativeFormSpec(action:verificationAction232("rejected"),context:data)}.padding(.vertical,8)}
+   }else{Section{Text(Catalog.display(data["status"]));Text(string(data["note"]));Text("Il selfie non è più conservato.").font(.caption).foregroundStyle(.secondary)}}
+  }
+ }.scrollContentBackground(.hidden).background(canvas).navigationTitle("Verifica profilo").task{await load()}.sheet(item:$form,onDismiss:{if completed{dismiss()}}){spec in NativeForm(store:store,spec:spec){completed=true}}}
+ func load()async{do{data=try await store.request("/verification/"+rid);error=""}catch{self.error=error.localizedDescription}}
+}
+func verificationAction232(_ status:String)->Object {return ["title":status == "approved" ? "Approva profilo":"Rifiuta profilo","path":"/verification/{id}","method":"PUT","help":"Approva solo se viso e codice corrispondono. Per rifiutare, scrivi un motivo visibile all’utente.","fields":[["key":"confirmed_review","label":"Ho confrontato viso, foto del profilo e codice sul foglio","type":"bool","required":true],["key":"status","type":"hidden","source":"decision233","default":status],["key":"note","label":"Messaggio per l’utente (obbligatorio se rifiuti)","type":"long","required":status == "rejected"]]]}

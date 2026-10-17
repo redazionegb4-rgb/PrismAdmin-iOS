@@ -134,10 +134,10 @@ enum SecureSession {
   UNUserNotificationCenter.current().getDeliveredNotifications { [weak self] delivered in
    Task { @MainActor in
     guard let self = self, self.authenticated else { return }
-    let currentTotal = ["photos","reports","support"].reduce(0) { $0 + max(0, (self.counts[$1] as? Int) ?? 0) }
+    let currentTotal = ["photos","reports","support","verification"].reduce(0) { $0 + max(0, (self.counts[$1] as? Int) ?? 0) }
     let resolved = delivered.filter { notification in
      let section = notification.request.content.userInfo["section"] as? String ?? ""
-     return currentTotal == 0 || (["photos","reports","support"].contains(section) && (self.counts[section] as? Int ?? 0) == 0)
+     return currentTotal == 0 || (["photos","reports","support","verification"].contains(section) && (self.counts[section] as? Int ?? 0) == 0)
     }.map { $0.request.identifier }
     UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers:resolved)
     self.updateSystemBadge()
@@ -150,7 +150,7 @@ enum SecureSession {
   badgeTask = Task { [weak self] in
    await previous?.value
    guard let self = self else { return }
-   let total = self.authenticated ? ["photos","reports","support"].reduce(0) { $0 + max(0,(self.counts[$1] as? Int) ?? 0) } : 0
+   let total = self.authenticated ? ["photos","reports","support","verification"].reduce(0) { $0 + max(0,(self.counts[$1] as? Int) ?? 0) } : 0
    _ = try? await UNUserNotificationCenter.current().setBadgeCount(total)
   }
  }
@@ -161,11 +161,11 @@ enum SecureSession {
 
  func resume() { pause(); guard authenticated else { return }; timer = Timer.scheduledTimer(withTimeInterval:30,repeats:true) { [weak self] _ in Task { @MainActor in await self?.refreshCounts(); await self?.syncPush() } } }
  func pause() { timer?.invalidate(); timer = nil }
- func open(_ section: String) { guard ["support","photos","reports"].contains(section) else { return }; pendingSection = section; consumeSection() }
+ func open(_ section: String) { guard ["support","photos","reports","verification"].contains(section) else { return }; pendingSection = section; consumeSection() }
  private func consumeSection() {
   guard authenticated, let section = pendingSection else { return }; pendingSection = nil
   guard allowed(Catalog.module(section)) else { return }
-  if section == "reports" { selectedTab = "more"; managementPath = [section] } else { selectedTab = section }
+  if section == "reports" || section == "verification" { selectedTab = "more"; managementPath = [section] } else { selectedTab = section }
  }
  func syncPush() async {
   guard authenticated, let token = UserDefaults.standard.string(forKey:"adminFCMToken"), !token.isEmpty else { return }

@@ -19,6 +19,7 @@ struct NativeFormSpec:Identifiable {
  @State private var photoItems:[PhotosPickerItem]=[]
  var fields:[Object]{objects(spec.action["fields"])}
  var body:some View {NavigationStack{Form {
+  if let help=spec.action["help"] as? String {Text(help).font(.callout).foregroundStyle(.secondary)}
   if spec.action["danger"] as? Bool == true {Label("Verifica i dati prima di confermare questa operazione.",systemImage:"exclamationmark.shield").foregroundStyle(.orange)}
   ForEach(Array(fields.enumerated()),id:\.offset){_,field in input(field)}
   if !error.isEmpty{Text(error).foregroundStyle(.red)}
