@@ -186,10 +186,19 @@ extension Dictionary where Key==String,Value==Any {var optionValue:String{string
    if let photos=data["photos"] as? [String],!photos.isEmpty {ScrollView(.horizontal){HStack{ForEach(Array(photos.enumerated()),id:\.offset){i,photo in VStack{NativePhoto(source:photo).frame(width:125,height:155).clipShape(RoundedRectangle(cornerRadius:18));Text(i==0 ? "Principale":"Foto \(i+1)").font(.caption)}}}}}
    Section("Profilo e account"){NativeInfo(data:data)}
    if store.role=="owner"{Button{form=NativeFormSpec(action:["title":"Modifica profilo","method":"PUT","path":"/users/{id}/profile","fields":Catalog.data["profile"] ?? []],context:data,profile:true)}label:{Label("Modifica tutto il profilo",systemImage:"pencil.circle.fill")}.foregroundStyle(gold)}
+   if store.role=="owner" {Section("Email di registrazione"){
+    Label(data["email_verified_at"] == nil || data["email_verified_at"] is NSNull ? "Email non verificata":"Email verificata",systemImage:"envelope.badge.shield.half.filled")
+    ForEach(Array(registrationEmailActions.enumerated()),id:\.offset){_,a in Button(string(a["title"])){form=NativeFormSpec(action:a,context:data)}}
+   }}
    Section("Gestisci account"){ForEach(Array((objects(Catalog.data["userActions"])+(store.role=="owner" ? objects(Catalog.data["ownerActions"]):[])).enumerated()),id:\.offset){_,a in Button(string(a["title"]),role:a["danger"] as? Bool == true ? .destructive:nil){form=NativeFormSpec(action:a,context:data)}}}
   }
  }.scrollContentBackground(.hidden).background(canvas).navigationTitle(string(data["name"]).isEmpty ? "Profilo":string(data["name"])).task{await load()}.refreshable{await load()}.onChange(of:store.contentRevision){_ in Task{await load()}}.sheet(item:$form){spec in NativeForm(store:store,spec:spec){} }
  }
+ var registrationEmailActions:[Object]{[
+ ["title":"Verifica email manualmente","path":"/users/{id}/verify-registration-email","method":"POST","danger":true,"help":"Conferma soltanto dopo aver verificato l'identità dell'utente. Sblocca l'accesso senza OTP.","fields":[["key":"reason","label":"Motivo della verifica manuale","type":"long","required":true]]],
+ ["title":"Modifica indirizzo email","path":"/users/{id}/change-registration-email","method":"POST","danger":true,"fields":[["key":"email","label":"Nuovo indirizzo email","type":"text","required":true],["key":"reason","label":"Motivo della modifica","type":"long","required":true]]],
+ ["title":"Reinvia codice OTP","path":"/users/{id}/resend-registration-code","method":"POST","fields":[["key":"reason","label":"Nota amministrativa (facoltativa)","type":"long"]]]
+ ]}
  func load()async{busy=true;defer{busy=false};do{data=try await store.request("/users/"+uid);error=""}catch{self.error=error.localizedDescription}}
 }
 @MainActor struct NativePhotoReview:View {
